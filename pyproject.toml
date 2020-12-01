@@ -6,6 +6,8 @@ authors = ["Martin Keogh <martin1keogh@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+requests = "^2.25.0"
+pydantic = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 
