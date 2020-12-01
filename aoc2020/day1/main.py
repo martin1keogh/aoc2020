@@ -3,6 +3,7 @@ from itertools import combinations
 from math import prod
 from typing import ClassVar
 
+from aoc2020.shared.models import NoResultFoundException
 from aoc2020.shared.puzzle import Puzzle
 from aoc2020.shared.solver import Solver
 
@@ -17,6 +18,8 @@ class SolverDay1(Solver):
         for x in combinations(self.puzzle.input, n):
             if sum(x) == self.TARGET:
                 return prod(x)
+        else:
+            raise NoResultFoundException
 
     def part1(self) -> int:
         return self._solve_for(2)
