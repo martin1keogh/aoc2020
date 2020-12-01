@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from aoc2020.shared.puzzle import Puzzle
 
+T = TypeVar("T")
+
 
 @dataclass
-class Solver:
-    puzzle: Puzzle
+class Solver(Generic[T]):
+    puzzle: Puzzle[T]
 
     def part1(self) -> int:
         ...
