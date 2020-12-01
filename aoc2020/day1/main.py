@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from itertools import combinations
+from math import prod
 from typing import ClassVar
 
 from aoc2020.shared.puzzle import Puzzle
@@ -11,34 +13,16 @@ class SolverDay1(Solver):
 
     TARGET: ClassVar = 2020
 
+    def _solve_for(self, n: int) -> int:
+        for x in combinations(self.puzzle.input, n):
+            if sum(x) == self.TARGET:
+                return prod(x)
+
     def part1(self) -> int:
-        sorted_input = sorted(self.puzzle.input)
-        for i, v1 in enumerate(sorted_input):
-            for v2 in sorted_input[i + i:]:
-                s = v1 + v2
-                if s == self.TARGET:
-                    return v1 * v2
-                if s > self.TARGET:
-                    break
-        else:
-            raise ValueError  # find a better exception
+        return self._solve_for(2)
 
     def part2(self) -> int:
-        sorted_input = sorted(self.puzzle.input)
-        for i, v1 in enumerate(sorted_input):
-            for j, v2 in enumerate(sorted_input[i + 1:]):
-                s1 = v1 + v2
-                if s1 > self.TARGET:
-                    break
-
-                for v3 in sorted_input[i + j + i:]:
-                    s2 = s1 + v3
-                    if s2 == self.TARGET:
-                        return v1 * v2 * v3
-                    if s2 > self.TARGET:
-                        break
-        else:
-            raise ValueError  # find a better exception
+        return self._solve_for(3)
 
 
 if __name__ == '__main__':
