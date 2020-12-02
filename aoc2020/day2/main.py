@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Tuple, NewType, Any, Dict
+from typing import Tuple, NewType, Any, Dict, Literal
 
 from pydantic import BaseModel, validator, ValidationError, Field
 from pydantic.types import PositiveInt
@@ -28,24 +29,35 @@ class CorporatePolicy(BaseModel):
 Password = NewType("Password", str)
 
 
-class ValidatedPassword(BaseModel):
+class ValidatedPassword(BaseModel, ABC):
     policy: CorporatePolicy
     password: Password
+
+    @classmethod
+    @abstractmethod
+    def _valid_password(cls, password: str, policy: CorporatePolicy) -> Literal[True]:
+        """Actual password validation. Returns true if OK, raises a validation error otherwise"""
+        ...
 
     @validator("password")
     def _check_password_is_valid(cls, password: str, values: Dict[str, Any]) -> str:
         if policy := values.get("policy"):
-            if isinstance(policy, CorporatePolicy):
-                count = password.count(policy.required_char)
-                if policy.min_rep <= count <= policy.max_rep:
-                    return password
-                else:
-                    raise ValueError(f"Wrong number of {policy.required_char} in {password}."
-                                     f" Got {count}, expected between {policy.min_rep} and {policy.max_rep}")
+            if isinstance(policy, CorporatePolicy) and cls._valid_password(password, policy):
+                return password
             else:
                 raise TypeError
         raise ValueError
 
+
+class ValidatedPasswordOldCompany(ValidatedPassword):
+    @classmethod
+    def _valid_password(cls, password: str, policy: CorporatePolicy) -> Literal[True]:
+        count = password.count(policy.required_char)
+        if policy.min_rep <= count <= policy.max_rep:
+            return True
+        else:
+            raise ValueError(f"Wrong number of {policy.required_char} in {password}."
+                             f" Got {count}, expected between {policy.min_rep} and {policy.max_rep}")
 
 
 @dataclass
@@ -61,7 +73,7 @@ class SolverDay2(Solver):
         count = 0
         for policy, password in self.puzzle.data:
             try:
-                ValidatedPassword(policy=policy, password=password)
+                ValidatedPasswordOldCompany(policy=policy, password=password)
                 count += 1
             except ValidationError:
                 pass
