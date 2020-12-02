@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Generic, TypeVar, Callable
 from typing import List
@@ -8,12 +9,23 @@ import requests
 T = TypeVar("T")
 
 
+@dataclass(frozen=True)
 class Puzzle(Generic[T]):
+    day: int
+    data: List[T]
+
+
+class PuzzleDownloader(Generic[T]):
     def __init__(self, day: int, row_parser: Callable[[str], T]):
         self.day = day
-        self.input: List[T] = []
+        self.row_parser = row_parser
+
+    def get_puzzle(self) -> Puzzle[T]:
+        data: List[T] = []
         for line in self._read_data():
-            self.input.append(row_parser(line))
+            data.append(self.row_parser(line))
+        puzzle = Puzzle(day=self.day, data=data)
+        return puzzle
 
     def _download_data(self) -> str:
         url = f"https://adventofcode.com/2020/day/{self.day}/input"

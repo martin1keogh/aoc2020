@@ -4,18 +4,18 @@ from math import prod
 from typing import ClassVar
 
 from aoc2020.shared.models import NoResultFoundException
-from aoc2020.shared.puzzle import Puzzle
+from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
 
 @dataclass
 class SolverDay1(Solver):
-    puzzle: Puzzle[int] = Puzzle(day=1, row_parser=int)
+    puzzle: Puzzle[int] = PuzzleDownloader(day=1, row_parser=int).get_puzzle()
 
     TARGET: ClassVar[int] = 2020
 
     def _solve_for(self, n: int) -> int:
-        for x in combinations(self.puzzle.input, n):
+        for x in combinations(self.puzzle.data, n):
             if sum(x) == self.TARGET:
                 return prod(x)
         else:
