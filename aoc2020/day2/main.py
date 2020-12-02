@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Tuple, NewType, Any, Dict, Literal
+from typing import Tuple, NewType, Any, Dict, Literal, Type
 
 from pydantic import BaseModel, validator, ValidationError, Field
 from pydantic.types import PositiveInt
@@ -60,6 +60,19 @@ class ValidatedPasswordOldCompany(ValidatedPassword):
                              f" Got {count}, expected between {policy.min_rep} and {policy.max_rep}")
 
 
+class ValidatedPasswordNewCompany(ValidatedPassword):
+    @classmethod
+    def _valid_password(cls, password: str, policy: CorporatePolicy) -> Literal[True]:
+        # no specs on out of bound values
+        count = [password[policy.min_rep - 1], password[policy.max_rep - 1]].count(policy.required_char)
+        if count == 1:
+            return True
+        elif count == 0:
+            raise ValueError(f"No {policy.required_char} at indices {policy.min_rep}/{policy.max_rep}.")
+        else:
+            raise ValueError(f"Both characters {policy.min_rep} and {policy.max_rep} are {policy.required_char}")
+
+
 @dataclass
 class SolverDay2(Solver):
     puzzle: Puzzle[Tuple[CorporatePolicy, Password]]
@@ -69,15 +82,21 @@ class SolverDay2(Solver):
         policy, password = string.split(": ")
         return CorporatePolicy.from_str(policy), Password(password)
 
-    def part1(self) -> int:
+    def _solve_for(self, validation: Type[ValidatedPassword]) -> int:
         count = 0
         for policy, password in self.puzzle.data:
             try:
-                ValidatedPasswordOldCompany(policy=policy, password=password)
+                validation(policy=policy, password=password)
                 count += 1
             except ValidationError:
                 pass
         return count
+
+    def part1(self) -> int:
+        return self._solve_for(ValidatedPasswordOldCompany)
+
+    def part2(self) -> int:
+        return self._solve_for(ValidatedPasswordNewCompany)
 
 
 if __name__ == '__main__':

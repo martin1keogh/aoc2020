@@ -14,6 +14,7 @@ class TestSolverDay2(PuzzleExamplesChecker):
                 1-3 b: cdefg
                 2-9 c: ccccccccc""".splitlines(),
             solution_part1=2,
+            solution_part2=1,
         )
     ]
     parser: Callable[[str], Tuple[CorporatePolicy, Password]] = SolverDay2.parser
