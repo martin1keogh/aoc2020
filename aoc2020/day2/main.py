@@ -1,10 +1,11 @@
 from __future__ import annotations
-from dataclasses import dataclass
+
 import re
+from dataclasses import dataclass
 from typing import Tuple, NewType, Any, Dict
 
-from pydantic import BaseModel, validator, ValidationError
-from pydantic.types import PositiveInt, constr
+from pydantic import BaseModel, validator, ValidationError, Field
+from pydantic.types import PositiveInt
 
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
@@ -13,7 +14,7 @@ from aoc2020.shared.solver import Solver
 class CorporatePolicy(BaseModel):
     min_rep: PositiveInt
     max_rep: PositiveInt
-    required_char: constr(regex=r"^[a-z]$")
+    required_char: str = Field(..., regex=r"^[a-z]$")
 
     _regex_from_str: re.Pattern = re.compile("""(?P<min_rep>\\d+)-(?P<max_rep>\\d+) (?P<required_char>[a-z])""")
 
@@ -32,7 +33,7 @@ class ValidatedPassword(BaseModel):
     password: Password
 
     @validator("password")
-    def _check_password_is_valid(cls, password: str, values: Dict[str, Any]):
+    def _check_password_is_valid(cls, password: str, values: Dict[str, Any]) -> str:
         if policy := values.get("policy"):
             if isinstance(policy, CorporatePolicy):
                 count = password.count(policy.required_char)
@@ -43,6 +44,8 @@ class ValidatedPassword(BaseModel):
                                      f" Got {count}, expected between {policy.min_rep} and {policy.max_rep}")
             else:
                 raise TypeError
+        raise ValueError
+
 
 
 @dataclass
