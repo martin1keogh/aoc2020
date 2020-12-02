@@ -66,7 +66,7 @@ class SolverDay2(Solver):
 
     @classmethod
     def parser(cls, string: str) -> Tuple[CorporatePolicy, Password]:
-        policy, password = string.split(":")
+        policy, password = string.split(": ")
         return CorporatePolicy.from_str(policy), Password(password)
 
     def part1(self) -> int:
