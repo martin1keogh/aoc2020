@@ -10,8 +10,7 @@ from aoc2020.shared.solver import Solver
 
 @dataclass
 class SolverDay1(Solver):
-    puzzle: Puzzle[int] = PuzzleDownloader(day=1, row_parser=int).get_puzzle()
-
+    puzzle: Puzzle[int]
     TARGET: ClassVar[int] = 2020
 
     def _solve_for(self, n: int) -> int:
@@ -29,4 +28,4 @@ class SolverDay1(Solver):
 
 
 if __name__ == '__main__':
-    SolverDay1().run()
+    SolverDay1(PuzzleDownloader(day=1, row_parser=int).get_puzzle()).run()
