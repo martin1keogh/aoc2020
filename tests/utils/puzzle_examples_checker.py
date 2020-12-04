@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 @dataclass(frozen=True)
 class Example(Generic[T]):
-    data: List[T]
+    data: T
     solution_part1: Optional[int] = None
     solution_part2: Optional[int] = None
 
@@ -29,9 +29,7 @@ class PuzzleExamplesChecker:
         solver_with_data = self.solver(Puzzle(day=self.day, data=self._parse_data(example.data)))
         assert solver_with_data.part2() == example.solution_part2
 
-    def _parse_data(self, data: List[str]) -> List:
+    def _parse_data(self, data):
         if not self.parser:
             return data
-        dedented = map(dedent, data)
-        parsed = map(self.parser, dedented)
-        return list(parsed)
+        return self.parser(dedent(data))

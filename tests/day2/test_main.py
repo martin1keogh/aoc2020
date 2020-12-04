@@ -12,7 +12,7 @@ class TestSolverDay2(PuzzleExamplesChecker):
             data="""\
                 1-3 a: abcde
                 1-3 b: cdefg
-                2-9 c: ccccccccc""".splitlines(),
+                2-9 c: ccccccccc""",
             solution_part1=2,
             solution_part2=1,
         )

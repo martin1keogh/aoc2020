@@ -3,11 +3,12 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Tuple, NewType, Any, Dict, Literal, Type
+from typing import Tuple, NewType, Any, Dict, Literal, Type, List
 
 from pydantic import BaseModel, validator, ValidationError, Field
 from pydantic.types import PositiveInt
 
+from aoc2020.shared.parser_utils import linewise_parser
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
@@ -75,12 +76,7 @@ class ValidatedPasswordNewCompany(ValidatedPassword):
 
 @dataclass
 class SolverDay2(Solver):
-    puzzle: Puzzle[Tuple[CorporatePolicy, Password]]
-
-    @classmethod
-    def parser(cls, string: str) -> Tuple[CorporatePolicy, Password]:
-        policy, password = string.split(": ")
-        return CorporatePolicy.from_str(policy), Password(password)
+    puzzle: Puzzle[List[Tuple[CorporatePolicy, Password]]]
 
     def _solve_for(self, validation: Type[ValidatedPassword]) -> int:
         count = 0
@@ -98,6 +94,12 @@ class SolverDay2(Solver):
     def part2(self) -> int:
         return self._solve_for(ValidatedPasswordNewCompany)
 
+    @staticmethod
+    @linewise_parser
+    def parser(string: str) -> Tuple[CorporatePolicy, Password]:
+        policy, password = string.split(": ")
+        return CorporatePolicy.from_str(policy), Password(password)
+
 
 if __name__ == '__main__':
-    SolverDay2(PuzzleDownloader(day=2, row_parser=SolverDay2.parser).get_puzzle()).run()
+    SolverDay2(PuzzleDownloader(day=2, parser=SolverDay2.parser).get_puzzle()).run()
