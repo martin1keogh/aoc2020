@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import prod
 from typing import List, Literal, Callable
 
 from pydantic import BaseModel, root_validator
@@ -54,6 +55,18 @@ class SolverDay3(Solver):
     def part1(self) -> int:
         path = self.puzzle.data.path_to_end(Slope(down=1, right=3))
         return path.count("#")
+
+    def part2(self) -> int:
+        slopes = [
+            Slope(down=1, right=1),
+            Slope(down=1, right=3),
+            Slope(down=1, right=5),
+            Slope(down=1, right=7),
+            Slope(down=2, right=1),
+        ]
+        paths = map(self.puzzle.data.path_to_end, slopes)
+        counts = map(lambda path: path.count("#"), paths)
+        return prod(counts)
 
     @staticmethod
     def parser(string: str) -> Forest:

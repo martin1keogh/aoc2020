@@ -22,6 +22,7 @@ class TestSolverDay3(PuzzleExamplesChecker):
                 #...##....#
                 .#..#...#.#""",
             solution_part1=7,
+            solution_part2=336
         )
     ]
     # hack to get around the fact that python sucks ass
