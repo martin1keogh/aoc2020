@@ -2,6 +2,7 @@ from typing import List, Reversible
 
 from pydantic import BaseModel, Field
 
+from aoc2020.shared.models import NoResultFoundException
 from aoc2020.shared.parser_utils import linewise_parser
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
@@ -45,6 +46,14 @@ class SolverDay5(Solver):
 
     def part1(self) -> int:
         return max(map(lambda seat: seat.id, self.puzzle.data))
+
+    def part2(self) -> int:
+        sorted_seats = sorted(self.puzzle.data, key=lambda seat: seat.id)
+        for s1, s2 in zip(sorted_seats, sorted_seats[1:]):
+            if s2.id - s1.id > 1:
+                return s1.id + 1
+        else:
+            raise NoResultFoundException
 
 
 if __name__ == '__main__':
