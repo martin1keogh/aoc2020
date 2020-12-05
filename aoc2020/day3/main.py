@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from math import prod
-from typing import List, Literal, Callable
+from typing import List, Literal, Callable, Dict
 
 from pydantic import BaseModel, root_validator
 
@@ -21,7 +21,7 @@ class Forest(BaseModel):
     __root__: List[List[ForestSpot]]
 
     @root_validator(pre=True)
-    def _ensure_constant_width(cls, values):
+    def _ensure_constant_width(cls, values: Dict) -> Dict:
         widths = map(len, values["__root__"])
         if len(set(widths)) != 1:
             raise ValueError("Non constant width found in forest.")
