@@ -19,8 +19,9 @@ class SolverDay6(Solver):
 
     @staticmethod
     @groupwise_parser
-    def parser(line: str) -> List[Answer]:
-        no_blanks = line.replace(" ", "")
+    def parser(group: List[str]) -> List[Answer]:
+        single_line = " ".join(group)
+        no_blanks = single_line.replace(" ", "")
         return list(map(lambda char: Answer(__root__=char), list(no_blanks)))
 
     def part1(self) -> int:

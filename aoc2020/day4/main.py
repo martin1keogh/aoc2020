@@ -35,8 +35,9 @@ class SolverDay4(Solver):
 
     @staticmethod
     @groupwise_parser
-    def parser(line: str) -> Union[ValidationError, Passport]:
-        fields_as_str = line.split(" ")
+    def parser(group: List[str]) -> Union[ValidationError, Passport]:
+        single_line = " ".join(group)
+        fields_as_str = single_line.split(" ")
         as_dict = dict(map(lambda s: s.split(":"), fields_as_str))  # type: ignore
         try:
             return Passport.parse_obj(as_dict)

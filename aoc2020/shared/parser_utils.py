@@ -13,17 +13,17 @@ def linewise_parser(parser: Callable[[str], T]) -> Callable[[str], List[T]]:
     return wrap
 
 
-def groupwise_parser(parser: Callable[[str], T]) -> Callable[[str], List[T]]:
+def groupwise_parser(parser: Callable[[List[str]], T]) -> Callable[[str], List[T]]:
     @functools.wraps(parser)
     def wrap(*args: str) -> List[T]:
         lines = args[-1]
-        reconstructed_lines = []
+        groups: List[List[str]] = []
+        grouped = groupby(lines.splitlines(), lambda line: len(line) == 0)
 
-        line_groups = groupby(lines.splitlines(), lambda line: len(line) == 0)
-        for is_empty, group in line_groups:
+        for is_empty, group in grouped:
             if not is_empty:
-                reconstructed_lines.append(" ".join(group))
+                groups.append(list(group))
 
-        return list(map(parser, reconstructed_lines))
+        return list(map(parser, groups))
 
     return wrap
