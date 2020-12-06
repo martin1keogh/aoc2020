@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import List
+from typing import List, Iterable
 
 from aoc2020.shared.parser_utils import groupwise_parser
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
@@ -11,7 +11,7 @@ class SolverDay6(Solver):
 
     @staticmethod
     @groupwise_parser
-    def parser(group: List[str]) -> List[str]:
+    def parser(group: Iterable[str]) -> List[str]:
         answers = []
         for answer_per_person in group:
             no_blanks = answer_per_person.replace(" ", "")

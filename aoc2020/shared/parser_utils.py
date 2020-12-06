@@ -1,6 +1,6 @@
 import functools
 from itertools import groupby
-from typing import Callable, TypeVar, List
+from typing import Callable, TypeVar, List, Iterable
 
 T = TypeVar("T")
 
@@ -13,7 +13,7 @@ def linewise_parser(parser: Callable[[str], T]) -> Callable[[str], List[T]]:
     return wrap
 
 
-def groupwise_parser(parser: Callable[[List[str]], T]) -> Callable[[str], List[T]]:
+def groupwise_parser(parser: Callable[[Iterable[str]], T]) -> Callable[[str], List[T]]:
     """Transform the parser so that it is called for each group (non-blank consecutive lines)"""
     @functools.wraps(parser)
     def wrap(*args: str) -> List[T]:
@@ -22,6 +22,6 @@ def groupwise_parser(parser: Callable[[List[str]], T]) -> Callable[[str], List[T
         grouped = groupby(lines.splitlines(), lambda line: len(line) == 0)
         # parse each group individually, discarding the empty ones
         # (blank lines in the input, ie group separators)
-        return [parser(list(group)) for is_empty, group in grouped if not is_empty]
+        return [parser(group) for is_empty, group in grouped if not is_empty]
 
     return wrap

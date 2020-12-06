@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional, Union, Literal
+from typing import List, Optional, Union, Literal, Iterable
 
 from pydantic import BaseModel, ValidationError, Field, MissingError, validator
 
@@ -35,7 +35,7 @@ class SolverDay4(Solver):
 
     @staticmethod
     @groupwise_parser
-    def parser(group: List[str]) -> Union[ValidationError, Passport]:
+    def parser(group: Iterable[str]) -> Union[ValidationError, Passport]:
         single_line = " ".join(group)
         fields_as_str = single_line.split(" ")
         as_dict = dict(map(lambda s: s.split(":"), fields_as_str))  # type: ignore
