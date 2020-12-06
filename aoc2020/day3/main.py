@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from math import prod
-from typing import List, Literal, Callable, Dict
+from typing import List, Literal, Dict
 
 from pydantic import BaseModel, root_validator
 
@@ -65,16 +65,13 @@ class SolverDay3(Solver):
             Slope(down=2, right=1),
         ]
         paths = map(self.puzzle.data.path_to_end, slopes)
-        counts = map(lambda path: path.count("#"), paths)
+        counts = [path.count("#") for path in paths]
         return prod(counts)
 
     @staticmethod
     def parser(string: str) -> Forest:
-        by_line = string.splitlines()
-        # using `list` directly in the map() makes mypy sad
-        list_: Callable[[str], List[str]] = list
-        by_character = map(list_, by_line)
-        return Forest(__root__=list(by_character))
+        rows = [list(line) for line in string.splitlines()]
+        return Forest(__root__=rows)
 
 
 if __name__ == '__main__':

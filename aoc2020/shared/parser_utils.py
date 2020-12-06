@@ -8,7 +8,7 @@ T = TypeVar("T")
 def linewise_parser(parser: Callable[[str], T]) -> Callable[[str], List[T]]:
     @functools.wraps(parser)
     def wrap(*args: str) -> List[T]:
-        return list(map(parser, args[-1].splitlines()))
+        return [parser(line) for line in args[-1].splitlines()]
 
     return wrap
 

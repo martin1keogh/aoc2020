@@ -22,13 +22,15 @@ class Seat(BaseModel):
     @property
     def row(self) -> int:
         row_specifier = self.specifier[:7]
-        as_binary_string = map(lambda char: char == "B", list(row_specifier))
-        return Seat._to_decimal(list(as_binary_string))
+        as_binary_string = [bool(char == "B") for char in list(row_specifier)]
+        return Seat._to_decimal(as_binary_string)
 
     @property
     def column(self) -> int:
         row_specifier = self.specifier[7:]
-        as_binary_string = map(lambda char: char == "R", list(row_specifier))
+        # same idea as the `bool(char == "B")` above, only shorter and
+        # more likely to make my colleagues hate me
+        as_binary_string = map("R".__eq__, list(row_specifier))
         return Seat._to_decimal(list(as_binary_string))
 
     @property
@@ -45,7 +47,7 @@ class SolverDay5(Solver):
         return Seat(specifier=line)
 
     def part1(self) -> int:
-        return max(map(lambda seat: seat.id, self.puzzle.data))
+        return max([seat.id for seat in self.puzzle.data])
 
     def part2(self) -> int:
         sorted_seats = sorted(self.puzzle.data, key=lambda seat: seat.id)

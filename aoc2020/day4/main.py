@@ -38,7 +38,7 @@ class SolverDay4(Solver):
     def parser(group: Iterable[str]) -> Union[ValidationError, Passport]:
         single_line = " ".join(group)
         fields_as_str = single_line.split(" ")
-        as_dict = dict(map(lambda s: s.split(":"), fields_as_str))  # type: ignore
+        as_dict = {tuple(s.split(":")) for s in fields_as_str}
         try:
             return Passport.parse_obj(as_dict)
         except ValidationError as v:
@@ -50,7 +50,7 @@ class SolverDay4(Solver):
             if isinstance(maybe_passport, Passport):
                 count += 1
             # part 1 doesn't care about anything but the correct fields being there (ie the MissingError)
-            elif all(map(lambda err: not isinstance(err.exc, MissingError), maybe_passport.raw_errors)):  # type: ignore
+            elif all([not isinstance(err.exc, MissingError) for err in maybe_passport.raw_errors]):  # type: ignore
                 count += 1
         return count
 
