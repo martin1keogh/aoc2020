@@ -7,28 +7,29 @@ from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
 
-class Answer(BaseModel):
-    __root__: str = Field(..., regex="^[a-zA-Z]$")
-
-    def __hash__(self) -> int:
-        return self.__root__.__hash__()
+class Answers(BaseModel):
+    __root__: str = Field(..., regex="^[a-zA-Z]+$")
 
 
 class SolverDay6(Solver):
-    puzzle: Puzzle[List[List[Answer]]]
+    puzzle: Puzzle[List[List[Answers]]]
 
     @staticmethod
     @groupwise_parser
-    def parser(group: List[str]) -> List[Answer]:
-        single_line = " ".join(group)
-        no_blanks = single_line.replace(" ", "")
-        return list(map(lambda char: Answer(__root__=char), list(no_blanks)))
+    def parser(group: List[str]) -> List[Answers]:
+        answers = []
+        for answer_per_person in group:
+            no_blanks = answer_per_person.replace(" ", "")
+            answers.append(Answers(__root__=no_blanks))
+        return answers
 
     def part1(self) -> int:
         count = 0
-        for answer_group in self.puzzle.data:
-            distinct_answers_in_group = set(answer_group)
-            count += len(distinct_answers_in_group)
+        for answers_per_group in self.puzzle.data:
+            answers_in_group = set()
+            for answers_per_person in answers_per_group:
+                answers_in_group.update(list(answers_per_person.__root__))
+            count += len(answers_in_group)
         return count
 
 
