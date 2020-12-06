@@ -14,16 +14,14 @@ def linewise_parser(parser: Callable[[str], T]) -> Callable[[str], List[T]]:
 
 
 def groupwise_parser(parser: Callable[[List[str]], T]) -> Callable[[str], List[T]]:
+    """Transform the parser so that it is called for each group (non-blank consecutive lines)"""
     @functools.wraps(parser)
     def wrap(*args: str) -> List[T]:
         lines = args[-1]
-        groups: List[List[str]] = []
+        # group together consecutive non-blank lines
         grouped = groupby(lines.splitlines(), lambda line: len(line) == 0)
-
-        for is_empty, group in grouped:
-            if not is_empty:
-                groups.append(list(group))
-
-        return list(map(parser, groups))
+        # parse each group individually, discarding the empty ones
+        # (blank lines in the input, ie group separators)
+        return [parser(list(group)) for is_empty, group in grouped if not is_empty]
 
     return wrap
