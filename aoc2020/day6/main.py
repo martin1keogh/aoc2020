@@ -30,7 +30,7 @@ class SolverDay6(Solver):
     def part2(self) -> int:
         count = 0
         for answers_per_group in self.puzzle.data:
-            as_sets = map(set, answers_per_group)
+            as_sets = map(set, answers_per_group)  # type: ignore
             common_answers = reduce(set.intersection, as_sets)
             count += len(common_answers)
         return count
