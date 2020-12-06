@@ -56,7 +56,7 @@ class TestSolverDay4(PuzzleExamplesChecker):
                 eyr:2022
 
                 iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719""",
-            solution_part2=0
+            solution_part2=4
         )
     ]
     # hack to get around the fact that python sucks ass
