@@ -1,9 +1,9 @@
 import re
-from itertools import groupby
 from typing import List, Optional, Union, Literal
 
 from pydantic import BaseModel, ValidationError, Field, MissingError, validator
 
+from aoc2020.shared.parser_utils import groupwise_parser
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
@@ -34,23 +34,14 @@ class SolverDay4(Solver):
     puzzle: Puzzle[List[Union[ValidationError, Passport]]]
 
     @staticmethod
-    def parser(lines: str) -> List[Union[ValidationError, Passport]]:
-        passports: List[Union[ValidationError, Passport]] = []
-
-        reconstructed_lines = []
-        line_groups = groupby(lines.splitlines(), lambda line: len(line) == 0)
-        for is_empty, group in line_groups:
-            if not is_empty:
-                reconstructed_lines.append(" ".join(group))
-
-        for line in reconstructed_lines:
-            fields_as_str = line.split(" ")
-            as_dict = dict(map(lambda s: s.split(":"), fields_as_str))  # type: ignore
-            try:
-                passports.append(Passport.parse_obj(as_dict))
-            except ValidationError as v:
-                passports.append(v)
-        return passports
+    @groupwise_parser
+    def parser(line: str) -> Union[ValidationError, Passport]:
+        fields_as_str = line.split(" ")
+        as_dict = dict(map(lambda s: s.split(":"), fields_as_str))  # type: ignore
+        try:
+            return Passport.parse_obj(as_dict)
+        except ValidationError as v:
+            return v
 
     def part1(self) -> int:
         count = 0
