@@ -17,7 +17,7 @@ class Instruction(BaseModel):
     code: Literal["acc", "nop", "jmp"]
     arg1: int
 
-    regex: ClassVar[str] = "(?P<code>\\w{3}) (?P<arg1>(\+|-)\\d+)"
+    regex: ClassVar[str] = "(?P<code>\\w{3}) (?P<arg1>(\\+|-)\\d+)"
 
 
 class LoopDetected(RuntimeError):
