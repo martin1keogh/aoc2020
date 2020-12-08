@@ -26,7 +26,7 @@ class BagColorCodeSpecifier:
     _containee_regex = "(\\d+) (\\w+ \\w+) bags?"
 
     def __post_init__(self, __root__: str) -> None:
-        self.container, self.containees = __root__.split(" contain ")
+        self.container, self.containees = __root__.split(" contain ")  # type: ignore
 
     @validator("container", pre=True)
     def _validate_container(cls, container: str) -> Bag:
@@ -65,7 +65,7 @@ class SolverDay7(Solver):
         return {spec.container: spec.containees for spec in self.puzzle.data}
 
     # needed for lru_cache to work, unused otherwise
-    def __hash__(self):
+    def __hash__(self) -> int:
         return 0
 
     @lru_cache(maxsize=None)
