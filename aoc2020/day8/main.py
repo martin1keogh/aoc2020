@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Literal, ClassVar, Set
 
@@ -72,6 +73,27 @@ class SolverDay8(Solver):
             raise NoResultFoundException
         except LoopDetected as ld:
             return ld.final_accumulator_value
+
+    def part2(self) -> int:
+        for index, instruction in enumerate(self.puzzle.data):
+            if instruction.code == "acc":
+                continue
+            elif instruction.code == "jmp":
+                new_instruction_set = deepcopy(self.puzzle.data)
+                new_instruction_set[index].code = "nop"
+            elif instruction.code == "nop":
+                new_instruction_set = deepcopy(self.puzzle.data)
+                new_instruction_set[index].code = "jmp"
+            else:
+                assert_never(instruction.code)
+
+            interpreter = Interpreter(new_instruction_set)
+
+            try:
+                return interpreter.run()
+            except LoopDetected:
+                pass
+        raise NoResultFoundException
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ class TestSolverDay6(PuzzleExamplesChecker):
                 jmp -4
                 acc +6""",
             solution_part1=5,
+            solution_part2=8,
         ),
     ]
     parser: Callable[[str], List[str]] = SolverDay8.parser
