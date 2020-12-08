@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Literal, ClassVar, Set
 
@@ -79,10 +78,12 @@ class SolverDay8(Solver):
             if instruction.code == "acc":
                 continue
             elif instruction.code == "jmp":
-                new_instruction_set = deepcopy(self.puzzle.data)
+                new_instruction_set = self.puzzle.data.copy()
+                new_instruction_set[index] = new_instruction_set[index].copy()
                 new_instruction_set[index].code = "nop"
             elif instruction.code == "nop":
-                new_instruction_set = deepcopy(self.puzzle.data)
+                new_instruction_set = self.puzzle.data.copy()
+                new_instruction_set[index] = new_instruction_set[index].copy()
                 new_instruction_set[index].code = "jmp"
             else:
                 assert_never(instruction.code)
