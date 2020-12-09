@@ -16,6 +16,9 @@ jobs:
         typer:
           - mypy
           - pyre
+        include:
+          - typer: mypy
+            typer_args: "aoc2020"
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -40,4 +43,4 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
       - name: Type check (${{ matrix.typer }})
-        run: poetry run ${{ matrix.typer }} aoc2020
+        run: poetry run ${{ matrix.typer }} ${{ matrix.typer_args }}
