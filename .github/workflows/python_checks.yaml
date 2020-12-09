@@ -20,7 +20,7 @@ jobs:
           - typer: mypy
             typer_args: "aoc2020"
           - typer: pyre
-            typer_args: "--source-directory '.' --exclude '.venv/' --verbose --noninteractive check"
+            typer_args: "--source-directory '.' --exclude '.venv/' --noninteractive check"
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
