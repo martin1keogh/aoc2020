@@ -21,6 +21,7 @@ class TestSolverDay11(PuzzleExamplesChecker):
                 L.LLLLLL.L
                 L.LLLLL.LL""",
             solution_part1=37,
+            solution_part2=26,
         ),
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay11.parser(y)
