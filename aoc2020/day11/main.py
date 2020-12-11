@@ -83,51 +83,47 @@ class Layout:
         x, y = xy
         self.__root__[y][x] = value
 
-    def step_part1(self) -> Layout:
+    def apply_to_all_indices(self, f: Callable[[Coord], State]) -> Layout:
         new_layout = []
 
-        for y, row in enumerate(self.__root__):
+        for y in range(self._height):
             new_row = []
-            for x, position in enumerate(row):
-                adj_seats = _adjacent_seats(x, y, self._width, self._height)
-                if position == State.FREE and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) == 0:
-                    new_elem = State.TAKEN
-                elif position == State.TAKEN and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) >= 4:
-                    new_elem = State.FREE
-                else:
-                    new_elem = position
-
-                new_row.append(new_elem)
+            for x in range(self._width):
+                new_row.append(f((x, y)))
             new_layout.append(new_row)
 
         return Layout(__root__=new_layout)
 
-    def step_part2(self) -> Layout:
-        new_layout = []
+    def state_updater_part1(self, coord: Coord) -> State:
+        x, y = coord
+        adj_seats = _adjacent_seats(x, y, self._width, self._height)
+        current = self[x, y]
+        if current == State.FREE and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) == 0:
+            return State.TAKEN
+        elif current == State.TAKEN and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) >= 4:
+            return State.FREE
+        else:
+            return current
 
-        for y, row in enumerate(self.__root__):
-            new_row = []
-            for x, position in enumerate(row):
-                taken_count = 0
-                for visible_one_dir in _visible_from((x, y), self._width, self._height):
-                    for visible_x, visible_y in visible_one_dir:
-                        if self[visible_x, visible_y] == State.TAKEN:
-                            taken_count += 1
-                            break
-                        if self[visible_x, visible_y] == State.FREE:
-                            break
+    def state_updater_part2(self, coord: Coord) -> State:
+        x, y = coord
+        current = self[x, y]
+        taken_count = 0
 
-                if position == State.FREE and taken_count == 0:
-                    new_elem = State.TAKEN
-                elif position == State.TAKEN and taken_count >= 5:
-                    new_elem = State.FREE
-                else:
-                    new_elem = position
+        for visible_one_dir in _visible_from((x, y), self._width, self._height):
+            for visible_x, visible_y in visible_one_dir:
+                if self[visible_x, visible_y] == State.TAKEN:
+                    taken_count += 1
+                    break
+                if self[visible_x, visible_y] == State.FREE:
+                    break
 
-                new_row.append(new_elem)
-            new_layout.append(new_row)
-
-        return Layout(__root__=new_layout)
+        if current == State.FREE and taken_count == 0:
+            return State.TAKEN
+        elif current == State.TAKEN and taken_count >= 5:
+            return State.FREE
+        else:
+            return current
 
 
 class SolverDay11(Solver):
@@ -137,20 +133,20 @@ class SolverDay11(Solver):
     def parser(input_: str) -> Layout:
         return Layout(__root__=[list(row) for row in input_.splitlines()])  # type: ignore
 
-    def _solve_with(self, step: Callable[[Layout], Layout]) -> int:
+    def _solve_with(self, step: Callable[[Layout], Callable[[Coord], State]]) -> int:
         current = self.puzzle.data
         while True:
-            new_layout = step(current)
+            new_layout = current.apply_to_all_indices(step(current))
             if new_layout == current:
                 return sum([1 for row in current.__root__ for seat in row if seat == State.TAKEN])
             else:
                 current = new_layout
 
     def part1(self) -> int:
-        return self._solve_with(lambda layout: layout.step_part1())
+        return self._solve_with(lambda layout: layout.state_updater_part1)
 
     def part2(self) -> int:
-        return self._solve_with(lambda layout: layout.step_part2())
+        return self._solve_with(lambda layout: layout.state_updater_part2)
 
 
 if __name__ == '__main__':
