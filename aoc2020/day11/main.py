@@ -64,7 +64,7 @@ class Layout:
     _height: int = field(init=False)
     _width: int = field(init=False)
 
-    def __post_init_post_parse__(self):
+    def __post_init_post_parse__(self) -> None:
         self._height = len(self.__root__)
         self._width = len(self.__root__[0])
 
@@ -91,9 +91,9 @@ class Layout:
             for x, position in enumerate(row):
                 adj_seats = _adjacent_seats(x, y, self._width, self._height)
                 if position == State.FREE and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) == 0:
-                    new_elem = "#"
+                    new_elem = State.TAKEN
                 elif position == State.TAKEN and list(map(self.__getitem__, adj_seats)).count(State.TAKEN) >= 4:
-                    new_elem = "L"
+                    new_elem = State.FREE
                 else:
                     new_elem = position
 
@@ -135,7 +135,7 @@ class SolverDay11(Solver):
 
     @staticmethod
     def parser(input_: str) -> Layout:
-        return Layout(__root__=[list(row) for row in input_.splitlines()])
+        return Layout(__root__=[list(row) for row in input_.splitlines()])  # type: ignore
 
     def _solve_with(self, step: Callable[[Layout], Layout]) -> int:
         current = self.puzzle.data
