@@ -82,10 +82,6 @@ class Boat(BaseModel):
         return Boat(direction="E", coord=Coord(x=0, y=0), waypoint_offset=Vector(x=10, y=1))  # type: ignore
 
 
-class Waypoint(BaseModel):
-    coord: Coord
-
-
 class SolverDay12(Solver):
     puzzle: Puzzle[List[Instruction]]
 
