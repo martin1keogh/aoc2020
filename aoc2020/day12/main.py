@@ -100,7 +100,8 @@ class SolverDay12(Solver):
             elif instruction.action == "F":
                 shift = boat.direction.axis * instruction.value
                 boat.coord += shift
-            elif instruction.action in ["L", "R"]:
+            # `action in ["L", "R"]` makes mypy fail to see we can never reach the `assert_never` (mypy 0.790)
+            elif instruction.action == "L" or instruction.action == "R":
                 rotation_number = instruction.value // 90
                 if instruction.action == "L":
                     rotation_number *= -1
@@ -118,7 +119,7 @@ class SolverDay12(Solver):
             elif instruction.action == "F":
                 shift = boat.waypoint_offset * instruction.value
                 boat.coord += shift
-            elif instruction.action in ["L", "R"]:
+            elif instruction.action == "L" or instruction.action == "R":
                 rotation_number = instruction.value // 90
                 if instruction.action == "L":
                     rotation_number *= 3
