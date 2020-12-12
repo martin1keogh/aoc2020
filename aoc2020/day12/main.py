@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Literal, Tuple, Union, List, Deque
+from typing import Literal, Tuple, Union, List, Deque, Dict
 
 from pydantic import BaseModel, validator
 
@@ -29,8 +29,22 @@ class Coord(Tuple[int, int]):
 
 
 class Axis(Tuple[int, int]):
+    @property
+    def x(self) -> int:
+        return self[0]
+
+    @property
+    def y(self) -> int:
+        return self[1]
+
     def __mul__(self, other: int) -> Coord:
-        return Coord((self[0] * other, self[1] * other))
+        return Coord((self.x * other, self.y * other))
+
+    def __add__(self, other: Coord) -> Axis:
+        return Axis((self.x + other.x, self.y + other.y))
+
+    def rotate_right(self) -> Axis:
+        return Axis((self.y, -self.x))
 
 
 class Direction(BaseModel):
@@ -64,7 +78,7 @@ class Instruction(BaseModel):
     value: int
 
     @validator("value")
-    def _check_rotation_by_90(cls, value, values) -> int:
+    def _check_rotation_by_90(cls, value: int, values: Dict) -> int:
         action = values["action"]
         if action in ["L", "R"] and not value % 90 == 0:
             raise ValueError
@@ -74,10 +88,15 @@ class Instruction(BaseModel):
 class Boat(BaseModel):
     direction: Direction
     coord: Coord
+    waypoint_offset: Axis
 
     @staticmethod
     def starting_position() -> Boat:
-        return Boat(direction="E", coord=Coord((0, 0)))  # type: ignore
+        return Boat(direction="E", coord=Coord((0, 0)), waypoint_offset=Axis((10, 1)))  # type: ignore
+
+
+class Waypoint(BaseModel):
+    coord: Coord
 
 
 class SolverDay12(Solver):
@@ -106,6 +125,25 @@ class SolverDay12(Solver):
                 rotation_number = instruction.value // 90
                 new_direction = Direction.clockwise(from_=boat.direction)[rotation_number]
                 boat.direction = new_direction
+            else:
+                assert_never(instruction)
+        return boat.coord.manhattan_distance
+
+    def part2(self) -> int:
+        boat = Boat.starting_position()
+        for instruction in self.puzzle.data:
+            if isinstance(instruction.action, Direction):
+                shift = instruction.action.axis * instruction.value
+                boat.waypoint_offset += shift
+            elif instruction.action == "F":
+                shift = boat.waypoint_offset * instruction.value
+                boat.coord += shift
+            elif instruction.action == "L":
+                for _ in range((360 - instruction.value) // 90):
+                    boat.waypoint_offset = boat.waypoint_offset.rotate_right()
+            elif instruction.action == "R":
+                for _ in range(instruction.value // 90):
+                    boat.waypoint_offset = boat.waypoint_offset.rotate_right()
             else:
                 assert_never(instruction)
         return boat.coord.manhattan_distance

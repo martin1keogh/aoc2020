@@ -16,6 +16,7 @@ class TestSolverDay12(PuzzleExamplesChecker):
                 R90
                 F11""",
             solution_part1=25,
+            solution_part2=286,
         ),
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay12.parser(y)
