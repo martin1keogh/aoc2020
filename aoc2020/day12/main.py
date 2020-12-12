@@ -104,14 +104,11 @@ class SolverDay12(Solver):
             elif instruction.action == "F":
                 shift = boat.direction.axis * instruction.value
                 boat.coord += shift
-            elif instruction.action == "L":
-                rotation_number = (360 - instruction.value) // 90
-                new_direction = Direction.clockwise(from_=boat.direction)[rotation_number]
-                boat.direction = new_direction
-            elif instruction.action == "R":
+            elif instruction.action in ["L", "R"]:
                 rotation_number = instruction.value // 90
-                new_direction = Direction.clockwise(from_=boat.direction)[rotation_number]
-                boat.direction = new_direction
+                if instruction.action == "L":
+                    rotation_number *= -1
+                boat.direction = Direction.clockwise(from_=boat.direction)[rotation_number]
             else:
                 assert_never(instruction)
         return boat.coord.manhattan_distance
@@ -125,11 +122,11 @@ class SolverDay12(Solver):
             elif instruction.action == "F":
                 shift = boat.waypoint_offset * instruction.value
                 boat.coord += shift
-            elif instruction.action == "L":
-                for _ in range((360 - instruction.value) // 90):
-                    boat.waypoint_offset = boat.waypoint_offset.rotate_clockwise()
-            elif instruction.action == "R":
-                for _ in range(instruction.value // 90):
+            elif instruction.action in ["L", "R"]:
+                rotation_number = instruction.value // 90
+                if instruction.action == "L":
+                    rotation_number *= 3
+                for _ in range(rotation_number):
                     boat.waypoint_offset = boat.waypoint_offset.rotate_clockwise()
             else:
                 assert_never(instruction)
