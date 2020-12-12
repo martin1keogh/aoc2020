@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Literal, Tuple, Union, List, Deque, Dict
+from typing import Literal, Union, List, Deque, Dict
 
 from pydantic import BaseModel, validator
 
@@ -11,40 +11,27 @@ from aoc2020.shared.solver import Solver
 from aoc2020.shared.typing_utils import assert_never
 
 
-class Coord(Tuple[int, int]):
-    @property
-    def x(self) -> int:
-        return self[0]
+class Coord(BaseModel):
+    x: int
+    y: int
 
-    @property
-    def y(self) -> int:
-        return self[1]
-
-    def __add__(self, other: Coord) -> Coord:
-        return Coord((self.x + other.x, self.y + other.y))
+    def __add__(self, vector: Vector) -> Coord:
+        return Coord(x=self.x + vector.x, y=self.y + vector.y)
 
     @property
     def manhattan_distance(self) -> int:
         return abs(self.x) + abs(self.y)
 
 
-class Axis(Tuple[int, int]):
-    @property
-    def x(self) -> int:
-        return self[0]
+class Vector(Coord):
+    def __mul__(self, other: int) -> Vector:
+        return Vector(x=self.x * other, y=self.y * other)
 
-    @property
-    def y(self) -> int:
-        return self[1]
+    def __add__(self, vector: Vector) -> Vector:
+        return Vector(x=self.x + vector.x, y=self.y + vector.y)
 
-    def __mul__(self, other: int) -> Coord:
-        return Coord((self.x * other, self.y * other))
-
-    def __add__(self, other: Coord) -> Axis:
-        return Axis((self.x + other.x, self.y + other.y))
-
-    def rotate_right(self) -> Axis:
-        return Axis((self.y, -self.x))
+    def rotate_clockwise(self) -> Vector:
+        return Vector(x=self.y, y=-self.x)
 
 
 class Direction(BaseModel):
@@ -57,15 +44,15 @@ class Direction(BaseModel):
         return dirs
 
     @property
-    def axis(self) -> Axis:
+    def axis(self) -> Vector:
         if self.__root__ == "N":
-            return Axis((0, 1))
+            return Vector(x=0, y=1)
         elif self.__root__ == "W":
-            return Axis((-1, 0))
+            return Vector(x=-1, y=0)
         elif self.__root__ == "S":
-            return Axis((0, -1))
+            return Vector(x=0, y=-1)
         elif self.__root__ == "E":
-            return Axis((1, 0))
+            return Vector(x=1, y=0)
         else:
             assert_never(self.__root__)
 
@@ -88,11 +75,11 @@ class Instruction(BaseModel):
 class Boat(BaseModel):
     direction: Direction
     coord: Coord
-    waypoint_offset: Axis
+    waypoint_offset: Vector
 
     @staticmethod
     def starting_position() -> Boat:
-        return Boat(direction="E", coord=Coord((0, 0)), waypoint_offset=Axis((10, 1)))  # type: ignore
+        return Boat(direction="E", coord=Coord(x=0, y=0), waypoint_offset=Vector(x=10, y=1))  # type: ignore
 
 
 class Waypoint(BaseModel):
@@ -140,10 +127,10 @@ class SolverDay12(Solver):
                 boat.coord += shift
             elif instruction.action == "L":
                 for _ in range((360 - instruction.value) // 90):
-                    boat.waypoint_offset = boat.waypoint_offset.rotate_right()
+                    boat.waypoint_offset = boat.waypoint_offset.rotate_clockwise()
             elif instruction.action == "R":
                 for _ in range(instruction.value // 90):
-                    boat.waypoint_offset = boat.waypoint_offset.rotate_right()
+                    boat.waypoint_offset = boat.waypoint_offset.rotate_clockwise()
             else:
                 assert_never(instruction)
         return boat.coord.manhattan_distance
