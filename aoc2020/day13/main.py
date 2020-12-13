@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+from functools import reduce
 from typing import List, Union, Literal
 
 from pydantic import BaseModel
@@ -40,6 +42,25 @@ class SolverDay13(Solver):
         only_known_frequencies = [bus for bus in self.puzzle.data.buses if bus.frequency != "x"]
         bus = min(only_known_frequencies, key=lambda bus: bus.time_until_next_departure(self.arrival_time))
         return bus.frequency * bus.time_until_next_departure(self.arrival_time)  # type: ignore
+
+    def part2(self) -> int:
+        constraints = []
+        for offset, bus in enumerate(self.puzzle.data.buses):
+            if bus.frequency == "x":
+                continue
+            constraints.append((bus.frequency, -offset))
+
+        # check all the frequencies are coprimes
+        assert reduce(math.gcd, map(lambda x: x[0], constraints)) == 1
+
+        # chinese remainder algorithm
+        result = 0
+        m = math.prod(map(lambda x: x[0], constraints))
+        for freq, remainder in constraints:
+            b = m // freq
+            result += remainder * b * pow(b, -1, freq)
+
+        return result % m
 
 
 if __name__ == '__main__':
