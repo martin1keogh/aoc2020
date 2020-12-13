@@ -1,26 +1,16 @@
 import math
+from dataclasses import dataclass
 from functools import reduce
-from typing import List, Union, Literal
-
-from pydantic import BaseModel
+from typing import List, Tuple
 
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
 
-class Bus(BaseModel):
-    frequency: Union[Literal["x"], int]
-
-    def time_until_next_departure(self, arrival_time: int) -> int:
-        if self.frequency == "x":
-            return 1
-        else:
-            return -arrival_time % self.frequency  # appears to work... /shrug
-
-
-class Notes(BaseModel):  # poor name
+@dataclass
+class Notes:
     arrival_time: int
-    buses: List[Bus]
+    buses: List[Tuple[int, int]]
 
 
 class SolverDay13(Solver):
@@ -33,30 +23,24 @@ class SolverDay13(Solver):
     @staticmethod
     def parser(input_: str) -> Notes:
         line1, line2 = input_.splitlines()
-        buses = map(lambda freq: {"frequency": freq}, line2.split(","))
-        return Notes(arrival_time=line1, buses=list(buses))  # type: ignore
+        buses = [(i, int(bus)) for i, bus in enumerate(line2.split(",")) if bus != "x"]
+        return Notes(arrival_time=int(line1), buses=buses)
 
     def part1(self) -> int:
-        only_known_frequencies = [bus for bus in self.puzzle.data.buses if bus.frequency != "x"]
-        bus = min(only_known_frequencies, key=lambda bus: bus.time_until_next_departure(self.arrival_time))
-        return bus.frequency * bus.time_until_next_departure(self.arrival_time)  # type: ignore
+        with_times_to_wait = [(bus, -self.arrival_time % bus) for _, bus in self.puzzle.data.buses]
+        bus, ttw = min(with_times_to_wait, key=lambda wttw: wttw[1])
+        return bus * ttw
 
     def part2(self) -> int:
-        constraints = []
-        for offset, bus in enumerate(self.puzzle.data.buses):
-            if bus.frequency == "x":
-                continue
-            constraints.append((bus.frequency, -offset))
-
         # check all the frequencies are coprimes
-        assert reduce(math.gcd, map(lambda x: x[0], constraints)) == 1
+        assert reduce(math.gcd, map(lambda x: x[0], self.puzzle.data.buses)) == 1
 
         # chinese remainder algorithm
         result = 0
-        m = math.prod(map(lambda x: x[0], constraints))
-        for freq, remainder in constraints:
+        m = math.prod(map(lambda x: x[1], self.puzzle.data.buses))
+        for remainder, freq in self.puzzle.data.buses:
             b = m // freq
-            result += remainder * b * pow(b, -1, freq)
+            result += - remainder * b * pow(b, -1, freq)
 
         return result % m
 
