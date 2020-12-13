@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 from functools import reduce
 from typing import List, Union, Literal
