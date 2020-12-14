@@ -15,6 +15,14 @@ class TestSolverDay14(PuzzleExamplesChecker):
                 mem[7] = 101
                 mem[8] = 0""",
             solution_part1=165,
+        ),
+        Example(
+            data="""\
+                mask = 000000000000000000000000000000X1001X
+                mem[42] = 100
+                mask = 00000000000000000000000000000000X0XX
+                mem[26] = 1""",
+            solution_part2=208,
         )
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay14.parser(y)
