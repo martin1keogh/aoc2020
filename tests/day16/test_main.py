@@ -24,5 +24,20 @@ class TestSolverDay16(PuzzleExamplesChecker):
                 38,6,12""",
             solution_part1=71,
         ),
+        Example(
+            data="""\
+                class: 0-1 or 4-19
+                row: 0-5 or 8-19
+                seat: 0-13 or 16-19
+
+                your ticket:
+                11,12,13
+
+                nearby tickets:
+                3,9,18
+                15,1,5
+                5,14,9""",
+            solution_part2=143
+        )
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay16.parser(y)
