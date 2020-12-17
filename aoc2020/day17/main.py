@@ -1,146 +1,100 @@
 from __future__ import annotations
 
-from collections import deque
-from copy import deepcopy
 from dataclasses import dataclass
-from textwrap import dedent
-from typing import Deque, Iterator
+from typing import Iterator, Tuple, Set
 
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
 from aoc2020.shared.solver import Solver
 
-# mypy seems to get confused here, complains about "expected str, got Literal["#", "."]"
-Cell = str  # Literal["#", "."]
+Coord = Tuple[int, int, int, int]
 
 
-@dataclass(frozen=True)
-class Universe:
-    cells: Deque[Deque[Deque[Cell]]]
+@dataclass
+class SmarterMultiverse:
+    active_cells: Set[Coord]
+    dimensions: Coord  # ~= max coordinates
 
-    def __str__(self) -> str:
-        layers = []
-        for layer in self.cells:
-            layers.append("\n".join(map("".join, layer)))
-        layers_str = "\n-----\n".join(layers)
-        s = f"""
-+++++++++
-{layers_str}
-+++++++++
-        """
-        return dedent(s)
+    def __contains__(self, item: Coord) -> bool:
+        for dim_item, dim_self in zip(item, self.dimensions):
+            if not abs(dim_item) <= dim_self:
+                return False
+        return True
 
-    def _neighbors(self, x: int, y: int, z: int) -> Iterator[Cell]:
+    def _neighbors(self, x: int, y: int, z: int, t: int) -> Iterator[Coord]:
         yield from (
-            self.cells[zz][yy][xx]
-            for zz in range(z - 1, z + 2) if 0 < zz < len(self.cells) - 1
-            for yy in range(y - 1, y + 2) if 0 < yy < len(self.cells[0]) - 1
-            for xx in range(x - 1, x + 2) if 0 < xx < len(self.cells[0][0]) - 1
-            if not (x == xx and y == yy and z == zz)
-        )
-
-    def expand(self) -> Universe:
-        new_universe = deepcopy(self)
-
-        for layer in new_universe.cells:
-            for row in layer:
-                row.append(".")
-                row.appendleft(".")
-            empty_row = deque(["." for _ in range(len(row))])
-            layer.append(empty_row.copy())
-            layer.appendleft(empty_row.copy())
-        empty_layer = deque([empty_row.copy() for _ in range(len(layer))])
-        new_universe.cells.append(empty_layer)
-        new_universe.cells.appendleft(deepcopy(empty_layer))
-
-        return new_universe
-
-    def run_cycle(self) -> Universe:
-        new_universe = self.expand()
-        copy_because_mutation = deepcopy(new_universe)
-
-        for z, z_layer in enumerate(new_universe.cells):
-            for y, y_layer in enumerate(z_layer):
-                for x, cell in enumerate(y_layer):
-                    active_neighbors = sum(1 for n in copy_because_mutation._neighbors(x, y, z) if n == "#")
-                    if cell == "." and active_neighbors == 3:
-                        new_universe.cells[z][y][x] = "#"
-                    elif cell == "#" and not (2 <= active_neighbors <= 3):
-                        new_universe.cells[z][y][x] = "."
-
-        return new_universe
-
-
-@dataclass(frozen=True, eq=True)
-class Multiverse:
-    cells: Deque[Deque[Deque[Deque[Cell]]]]
-
-    def _neighbors(self, x: int, y: int, z: int, t: int) -> Iterator[Cell]:
-        yield from (
-            self.cells[tt][zz][yy][xx]
-            for tt in range(t - 1, t + 2) if 0 < tt < len(self.cells) - 1
-            for zz in range(z - 1, z + 2) if 0 < zz < len(self.cells[tt]) - 1
-            for yy in range(y - 1, y + 2) if 0 < yy < len(self.cells[tt][zz]) - 1
-            for xx in range(x - 1, x + 2) if 0 < xx < len(self.cells[tt][zz][yy]) - 1
+            (xx, yy, zz, tt)
+            for tt in range(t - 1, t + 2)
+            for zz in range(z - 1, z + 2)
+            for yy in range(y - 1, y + 2)
+            for xx in range(x - 1, x + 2)
             if not (x == xx and y == yy and z == zz and t == tt)
+            if (xx, yy, zz, tt) in self
         )
 
-    def expand(self) -> Multiverse:
-        new_multiverse = deepcopy(self)
+    def expand(self) -> SmarterMultiverse:
+        return SmarterMultiverse(
+            active_cells=self.active_cells.copy(),
+            # 1.__add__ doesn't work :'(
+            dimensions=tuple(map(lambda d: d + 1, self.dimensions))  # type: ignore
+        )
 
-        for universe in new_multiverse.cells:
-            for layer in universe:
-                for row in layer:
-                    row.append(".")
-                    row.appendleft(".")
-                empty_row = deque(["." for _ in range(len(row))])
-                layer.append(empty_row.copy())
-                layer.appendleft(empty_row.copy())
-            empty_layer = deque([empty_row.copy() for _ in range(len(layer))])
-            universe.append(empty_layer)
-            universe.appendleft(deepcopy(empty_layer))
-        empty_universe = deque([deepcopy(empty_layer) for _ in range(len(universe))])
-        new_multiverse.cells.append(empty_universe)
-        new_multiverse.cells.appendleft(deepcopy(empty_universe))
-
-        return new_multiverse
-
-    def run_cycle(self) -> Multiverse:
+    def run_cycle(self) -> SmarterMultiverse:
         new_universe = self.expand()
-        copy_because_mutation = deepcopy(new_universe)
+        (x, y, z, t) = new_universe.dimensions
 
-        for t, universe in enumerate(new_universe.cells):
-            for z, z_layer in enumerate(universe):
-                for y, y_layer in enumerate(z_layer):
-                    for x, cell in enumerate(y_layer):
-                        active_neighbors = sum(1 for n in copy_because_mutation._neighbors(x, y, z, t) if n == "#")
-                        if cell == "." and active_neighbors == 3:
-                            new_universe.cells[t][z][y][x] = "#"
-                        elif cell == "#" and not (2 <= active_neighbors <= 3):
-                            new_universe.cells[t][z][y][x] = "."
+        # four for loops makes me sad
+        for xx in range(-x, x + 1):
+            for yy in range(-y, y + 1):
+                for zz in range(-z, z + 1):
+                    for tt in range(-t, t + 1):
+                        active_neighbors = len(set(new_universe._neighbors(xx, yy, zz, tt)) & self.active_cells)
+                        cell_is_active = (xx, yy, zz, tt) in self.active_cells
+                        if not cell_is_active and active_neighbors == 3:
+                            new_universe.active_cells.add((xx, yy, zz, tt))
+                        elif cell_is_active and not (2 <= active_neighbors <= 3):
+                            new_universe.active_cells.remove((xx, yy, zz, tt))
 
         return new_universe
+
+
+@dataclass
+class BoringVerse(SmarterMultiverse):
+    def expand(self) -> BoringVerse:
+        return BoringVerse(
+            active_cells=self.active_cells.copy(),
+            # force the last dimension to 0
+            dimensions=(self.dimensions[0] + 1, self.dimensions[1] + 1, self.dimensions[2] + 1, 0)
+        )
 
 
 class SolverDay17(Solver):
-    puzzle: Puzzle[Universe]
+    puzzle: Puzzle[SmarterMultiverse]
 
     @staticmethod
-    def parser(input_: str) -> Universe:
-        rows = input_.splitlines()
-        cells = deque([deque(row) for row in rows])
-        return Universe(deque([cells]))
+    def parser(input_: str) -> SmarterMultiverse:
+        cells = [list(row) for row in input_.splitlines()]
+
+        dimensions = (len(cells[0]) // 2, len(cells) // 2, 0, 0)
+        active = set()
+        for y in range(len(cells)):
+            for x in range(len(cells[0])):
+                if cells[y][x] == "#":
+                    active.add((x - len(cells[0]) // 2, y - len(cells) // 2, 0, 0))
+
+        return SmarterMultiverse(active_cells=active, dimensions=dimensions)
 
     def part1(self) -> int:
-        u = self.puzzle.data
+        u = BoringVerse(active_cells=self.puzzle.data.active_cells, dimensions=self.puzzle.data.dimensions)
         for _ in range(6):
-            u = u.run_cycle()
-        return sum(1 for layer in u.cells for row in layer for cell in row if cell == "#")
+            # should fix it so that .run_cycle return self.type, but...
+            u = u.run_cycle()  # type: ignore
+        return len(u.active_cells)
 
     def part2(self) -> int:
-        mu = Multiverse(cells=deque([self.puzzle.data.cells]))
+        mu = self.puzzle.data
         for _ in range(6):
             mu = mu.run_cycle()
-        return sum(1 for universe in mu.cells for layer in universe for row in layer for cell in row if cell == "#")
+        return len(mu.active_cells)
 
 
 if __name__ == '__main__':
