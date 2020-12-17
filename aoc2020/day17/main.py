@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 from typing import Iterator, Tuple, Set
 
@@ -42,17 +43,15 @@ class SmarterMultiverse:
         new_universe = self.expand()
         (x, y, z, t) = new_universe.dimensions
 
-        # four for loops makes me sad
-        for xx in range(-x, x + 1):
-            for yy in range(-y, y + 1):
-                for zz in range(-z, z + 1):
-                    for tt in range(-t, t + 1):
-                        active_neighbors = len(set(new_universe._neighbors(xx, yy, zz, tt)) & self.active_cells)
-                        cell_is_active = (xx, yy, zz, tt) in self.active_cells
-                        if not cell_is_active and active_neighbors == 3:
-                            new_universe.active_cells.add((xx, yy, zz, tt))
-                        elif cell_is_active and not (2 <= active_neighbors <= 3):
-                            new_universe.active_cells.remove((xx, yy, zz, tt))
+        for (xx, yy, zz, tt) in itertools.product(
+                range(-x, x + 1), range(-y, y + 1), range(-z, z + 1), range(-t, t + 1)
+        ):
+            active_neighbors = len(set(new_universe._neighbors(xx, yy, zz, tt)) & self.active_cells)
+            cell_is_active = (xx, yy, zz, tt) in self.active_cells
+            if not cell_is_active and active_neighbors == 3:
+                new_universe.active_cells.add((xx, yy, zz, tt))
+            elif cell_is_active and not (2 <= active_neighbors <= 3):
+                new_universe.active_cells.remove((xx, yy, zz, tt))
 
         return new_universe
 
