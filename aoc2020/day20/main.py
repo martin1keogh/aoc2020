@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from functools import lru_cache
 from math import sqrt
-from typing import List, Callable, Iterator, Optional, Iterable
+from typing import List, Callable, Iterator, Optional, Iterable, Tuple, TypeVar, Set
 
 from toolz import compose, identity, first, last, get_in
 
@@ -24,22 +23,41 @@ def tile_from_rows(id_: int, rows_iter: Iterator[str]) -> Tile:
     return Tile(id_, top, bottom, left, right)
 
 
-@lru_cache(maxsize=None)
-def vertical_flip(tile: Tile) -> Tile:
-    return tile._replace(top=tile.bottom, bottom=tile.top, left=tile.left[::-1], right=tile.right[::-1])
+T = TypeVar("T", List[str], Tile)
 
 
-@lru_cache(maxsize=None)
-def horizontal_flip(tile: Tile) -> Tile:
-    return tile._replace(top=tile.top[::-1], bottom=tile.bottom[::-1], left=tile.right, right=tile.left)
+def vertical_flip(tile: T) -> T:
+    if isinstance(tile, Tile):
+        return tile._replace(top=tile.bottom, bottom=tile.top, left=tile.left[::-1], right=tile.right[::-1])
+    else:
+        return tile[::-1]
 
 
-@lru_cache(maxsize=None)
-def transpose(tile: Tile) -> Tile:
-    return tile._replace(top=tile.left, left=tile.top, right=tile.bottom, bottom=tile.right)
+def horizontal_flip(tile: T) -> T:
+    if isinstance(tile, Tile):
+        return tile._replace(top=tile.top[::-1], bottom=tile.bottom[::-1], left=tile.right, right=tile.left)
+    else:
+        res = []
+        for line in tile:
+            res.append(line[::-1])
+        return res
 
 
-transformations: List[Callable[[Tile], Tile]] = [
+def transpose(tile: T) -> T:
+    if isinstance(tile, Tile):
+        return tile._replace(top=tile.left, left=tile.top, right=tile.bottom, bottom=tile.right)
+    else:
+        # https://stackoverflow.com/questions/6473679/transpose-list-of-lists
+        return list(map("".join, zip(*tile)))
+
+
+def crop(tile: List[str]) -> List[str]:
+    res = tile[1:-1]
+    res = map(lambda s: s[1:-1], res)
+    return list(res)
+
+
+transformations: List[Callable[[T], T]] = [
     identity,
     vertical_flip,
     horizontal_flip,
@@ -50,7 +68,7 @@ transformations: List[Callable[[Tile], Tile]] = [
 ]
 
 # probably need a SolvedGrid type too
-Grid = List[List[Optional[Tile]]]
+Grid = List[List[Optional[Tuple[Tile, Callable]]]]
 
 
 class SolverDay20(Solver):
@@ -65,8 +83,8 @@ class SolverDay20(Solver):
         row = current_tile // grid_size
         column = current_tile % grid_size
 
-        left: Optional[Tile] = get_in([row, column - 1], grid, default=None)
-        above: Optional[Tile] = get_in([row - 1, column], grid, default=None)
+        left: Optional[Tile] = get_in([row, column - 1, 0], grid, default=None)
+        above: Optional[Tile] = get_in([row - 1, column, 0], grid, default=None)
 
         for i, tile in enumerate(to_go):
             for transformation in transformations:
@@ -78,8 +96,7 @@ class SolverDay20(Solver):
                 if left and not left.right == transformed_tile.left:
                     continue
 
-                # local_grid = list(map(copy, grid))
-                grid[row][column] = transformed_tile
+                grid[row][column] = (transformed_tile, transformation)
                 to_go_copy = to_go.copy()
                 to_go_copy.pop(i)
                 yield from SolverDay20._explore_arrangement(grid, current_tile + 1, to_go_copy)
@@ -100,11 +117,72 @@ class SolverDay20(Solver):
     @groupwise_parser
     def parser(group: Iterable[str]) -> Tile:
         lines = list(group)
-        return tile_from_rows(int(lines[0].split()[1][:-1]), iter(lines[1:]))
+        id_ = int(lines[0].split()[1][:-1])
+        globals()[id_] = lines[1:]  # lol++
+        return tile_from_rows(id_, iter(lines[1:]))
 
     def part1(self) -> int:
         solution = self._solve()
-        return solution[0][0].id * solution[0][-1].id * solution[-1][0].id * solution[-1][-1].id  # type: ignore
+        return solution[0][0][0].id * solution[0][-1][0].id * solution[-1][0][0].id * solution[-1][-1][
+            0].id  # type: ignore
+
+    def part2(self) -> int:
+        solution = list(zip(*self._solve()))  # guess it was wrong above too...
+        image: List[List[List[str]]] = []
+
+        for row in solution:
+            row_image = []
+            for (tile, transformation) in row:
+                original = globals()[tile.id]
+                transformed = transformation(original)
+                transformed = transpose(
+                    transformed)  # to get the same image as the example, should not be necessary I think?
+                cropped = crop(transformed)
+                row_image.append(cropped)
+            image.append(row_image)
+
+        s = []
+        for row in image:
+            for z in zip(*row):
+                s.append("".join(z))
+
+        monster_zones = set()
+        for transformation in transformations:
+            s = transformation(s)
+            for y, row in enumerate(s):
+                for x, _ in enumerate(row):
+                    monsters = SolverDay20._detect_monster(s, x, y)
+                    if monsters:
+                        monster_zones.update(monsters)
+
+            if monster_zones:
+                break
+
+        return sum(map(lambda l: l.count("#"), s)) - len(monster_zones)
+
+    @staticmethod
+    def _monster_shape() -> List[Tuple[int, int]]:
+        s = """\
+                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   """
+        res = []
+        for y, row in enumerate(s.splitlines()):
+            for x, cell in enumerate(row):
+                if cell == "#":
+                    res.append((x, y))
+        return res
+
+    @staticmethod
+    def _detect_monster(image: List[str], xx: int, yy: int) -> Optional[Set[Tuple[int, int]]]:
+        adjusted = set(map(lambda t: (t[0] + xx, t[1] + yy), SolverDay20._monster_shape()))
+        try:
+            for x, y in adjusted:
+                if not image[y][x] == "#":
+                    return None
+            return adjusted
+        except IndexError:
+            return None
 
 
 if __name__ == '__main__':

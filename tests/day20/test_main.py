@@ -118,6 +118,7 @@ class TestSolverDay20(PuzzleExamplesChecker):
                 ..#.......
                 ..#.###...""",
             solution_part1=20899048083289,
+            solution_part2=273,
         ),
         Example(
             data="""\
