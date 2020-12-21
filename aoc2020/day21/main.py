@@ -25,20 +25,22 @@ class SolverDay21(Solver):
         allergens = allergens_str.split(", ")
         return set(map(Ingredient, ingredients)), set(map(Allergen, allergens))
 
-    def part1(self) -> int:
-        allergen_to_possible_ingredients: Dict[Allergen, List[Set[Ingredient]]] = defaultdict(list)
+    def _find_ingredients_with_allergens(self) -> Set[Ingredient]:
+        allergen_to_food: Dict[Allergen, List[Set[Ingredient]]] = defaultdict(list)
         for ingredients, allergens in self.puzzle.data:
             for allergen in allergens:
-                allergen_to_possible_ingredients[allergen].append(ingredients)
+                allergen_to_food[allergen].append(ingredients)
 
-        for allergen, possible_ingredients in allergen_to_possible_ingredients.items():
+        allergen_to_possible_ingredients: Dict[Allergen, Set[Ingredient]] = {}
+        for allergen, possible_ingredients in allergen_to_food.items():
             allergen_to_possible_ingredients[allergen] = reduce(set.intersection, possible_ingredients)  # type: ignore
 
         with_allergens = set(ing for ing_list in allergen_to_possible_ingredients.values() for ing in ing_list)
-        ok_count = 0
-        for ingredients, _ in self.puzzle.data:
-            ok_count += len(ingredients - with_allergens)
-        return ok_count
+        return with_allergens
+
+    def part1(self) -> int:
+        with_allergens = self._find_ingredients_with_allergens()
+        return sum(len(ingredients - with_allergens) for ingredients, _ in self.puzzle.data)
 
 
 if __name__ == '__main__':
