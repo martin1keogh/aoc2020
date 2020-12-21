@@ -15,6 +15,7 @@ class TestSolverDay21(PuzzleExamplesChecker):
                 sqjhc fvjkl (contains soy)
                 sqjhc mxmxvkd sbzzf (contains fish)""",
             solution_part1=5,
+            solution_part2="mxmxvkd,sqjhc,fvjkl",  # type: ignore
         ),
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay21.parser(y)
