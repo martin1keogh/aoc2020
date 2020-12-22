@@ -24,6 +24,19 @@ class TestSolverDay22(PuzzleExamplesChecker):
                 7
                 10""",
             solution_part1=306,
+            solution_part2=291,
         ),
+        Example(
+            data="""
+                Player 1:
+                43
+                19
+
+                Player 2:
+                2
+                29
+                14""",
+            solution_part2=105
+        )
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay22.parser(y)
