@@ -31,6 +31,7 @@ class TestSolverDay24(PuzzleExamplesChecker):
                 neswnwewnwnwseenwseesewsenwsweewe
                 wseweeenwnesenwwwswnew""",
             solution_part1=10,
+            solution_part2=2208,
         ),
     ]
     parser: Callable[[str], List[str]] = lambda x, y: SolverDay24.parser(y)
