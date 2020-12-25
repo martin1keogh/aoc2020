@@ -40,3 +40,31 @@ jobs:
 
       - name: Type check (${{ matrix.typer }})
         run: poetry run ${{ matrix.typer }} aoc2020
+
+  tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python_version }}
+
+      - name: Set up poetry
+        run: pip install poetry==${{ env.poetry_version }}
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      - name: Python tests
+        run: poetry run pytest -v
