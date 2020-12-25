@@ -27,8 +27,8 @@ class TestSolverDay16(PuzzleExamplesChecker):
         Example(
             data="""\
                 class: 0-1 or 4-19
-                row: 0-5 or 8-19
-                seat: 0-13 or 16-19
+                departure_row: 0-5 or 8-19
+                departure_seat: 0-13 or 16-19
 
                 your ticket:
                 11,12,13
