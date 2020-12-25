@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Tuple, Set, Iterator
+from typing import List, Tuple, Set
 
-from toolz import identity, groupby
+from toolz import identity, groupby  # type: ignore
 
 from aoc2020.shared.parser_utils import linewise_parser
 from aoc2020.shared.puzzle import Puzzle, PuzzleDownloader
@@ -38,7 +38,8 @@ class TileSet:
                 return False
         return True
 
-    def _neighbors(self, x: int, y: int) -> Iterator[Coord]:
+    @staticmethod
+    def _neighbors(x: int, y: int) -> List[Coord]:
         return [
             (x+1, y),
             (x-1, y),
@@ -89,7 +90,7 @@ class SolverDay24(Solver):
     def part1(self) -> int:
         to_flip = []
         for path in self.puzzle.data:
-            to_append = tuple(map(sum, (zip(*map(lambda direction: direction.axis, path)))))
+            to_append = tuple(map(sum, (zip(*map(lambda direction: direction.axis, path)))))  # type: ignore
             to_flip.append(to_append)
 
         count = 0
@@ -102,7 +103,7 @@ class SolverDay24(Solver):
     def part2(self) -> int:
         to_flip = []
         for path in self.puzzle.data:
-            to_append = tuple(map(sum, (zip(*map(lambda direction: direction.axis, path)))))
+            to_append = tuple(map(sum, (zip(*map(lambda direction: direction.axis, path)))))  # type: ignore
             to_flip.append(to_append)
 
         black_tiles = set()

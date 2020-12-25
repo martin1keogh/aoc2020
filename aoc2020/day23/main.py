@@ -5,7 +5,7 @@ from itertools import islice, chain, dropwhile, tee
 from math import prod
 from typing import Deque, List
 
-from toolz import partition
+from toolz import partition  # type: ignore
 
 from aoc2020.shared.puzzle import Puzzle
 from aoc2020.shared.solver import Solver
@@ -96,8 +96,8 @@ class SolverDay23(Solver):
             cup_to_group[current] = nb_groups - 1
             partitioned[-1].append(current)
 
-        cups = list(chain(*partitioned))
-        chained = chain(cups, cups)
+        merged = list(chain(*partitioned))
+        chained = chain(merged, merged)
         from_1 = dropwhile(lambda x: x != 1, chained)
         return prod(islice(from_1, 1, 3))
 
