@@ -6,7 +6,7 @@ authors = ["Martin Keogh <martin1keogh@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.25.0"
+requests = "^2.25.1"
 pydantic = "^1.7.3"
 lark-parser = "^0.11.1"
 toolz = "^0.11.1"
