@@ -62,7 +62,7 @@ python-versions = "*"
 
 [[package]]
 name = "lark-parser"
-version = "0.11.1"
+version = "0.11.2"
 description = "a modern parsing library"
 category = "main"
 optional = false
@@ -234,7 +234,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "f2ea831e8e3f0bd7e233055065adc6e43b5e13163e17970ff9b20a13229a5857"
+content-hash = "70da2ddcf4d6f25000c7e81f1f716b93419c10c5dd373614d23981abc112d201"
 
 [metadata.files]
 atomicwrites = [
@@ -266,8 +266,7 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 lark-parser = [
-    {file = "lark-parser-0.11.1.tar.gz", hash = "sha256:20bdefdf1b6e9bcb38165ea5cc4f27921a99c6f4c35264a3a953fd60335f1f8c"},
-    {file = "lark_parser-0.11.1-py2.py3-none-any.whl", hash = "sha256:8b747e1f544dcc2789e3feaddd2a50c6a73bed69d62e9c69760c1e1f7d23495f"},
+    {file = "lark-parser-0.11.2.tar.gz", hash = "sha256:ef610461ebf2b243502f337d9d49879e39f9add846a4749e88c8dcdc1378bb6b"},
 ]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
