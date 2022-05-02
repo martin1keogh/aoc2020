@@ -211,8 +211,19 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "types-requests"
-version = "2.26.0"
+version = "2.27.25"
 description = "Typing stubs for requests"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.14"
+description = "Typing stubs for urllib3"
 category = "dev"
 optional = false
 python-versions = "*"
@@ -241,7 +252,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "7bf7aea8af350e772c02de15b9e2ed3b84d283392dfaab6698b293c8eda4c7ce"
+content-hash = "ecb288e4afc0174ba49ab05e12cc0c4535a26e6f95eff43492f434f59d0635f9"
 
 [metadata.files]
 atomicwrites = [
@@ -362,8 +373,12 @@ toolz = [
     {file = "toolz-0.11.2.tar.gz", hash = "sha256:6b312d5e15138552f1bda8a4e66c30e236c831b612b2bf0005f8a1df10a4bc33"},
 ]
 types-requests = [
-    {file = "types-requests-2.26.0.tar.gz", hash = "sha256:df5ec8c34b413a42ebb38e4f96bdeb68090b875bdfcc5138dc82989c95445883"},
-    {file = "types_requests-2.26.0-py3-none-any.whl", hash = "sha256:809b5dcd3c408ac39d11d593835b6aff32420b3e7ddb79c7f3e823330f040466"},
+    {file = "types-requests-2.27.25.tar.gz", hash = "sha256:805ae7e38fd9d157153066dc4381cf585fd34dfa212f2fc1fece248c05aac571"},
+    {file = "types_requests-2.27.25-py3-none-any.whl", hash = "sha256:2444905c89731dbcb6bbcd6d873a04252445df7623917c640e463b2b28d2a708"},
+]
+types-urllib3 = [
+    {file = "types-urllib3-1.26.14.tar.gz", hash = "sha256:2a2578e4b36341ccd240b00fccda9826988ff0589a44ba4a664bbd69ef348d27"},
+    {file = "types_urllib3-1.26.14-py3-none-any.whl", hash = "sha256:5d2388aa76395b1e3999ff789ea5b3283677dad8e9bcf3d9117ba19271fd35d9"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
